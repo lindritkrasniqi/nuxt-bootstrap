@@ -1,6 +1,7 @@
 export default {
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
+    titleTemplate: '%s - powered by @lindritkrasniqi',
     title: 'nuxt-bootstrap',
     htmlAttrs: {
       lang: 'en'
@@ -22,6 +23,7 @@ export default {
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   plugins: [
+    '~/plugins/axios.js'
   ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
@@ -38,13 +40,56 @@ export default {
     // https://go.nuxtjs.dev/bootstrap
     'bootstrap-vue/nuxt',
     // https://go.nuxtjs.dev/axios
-    '@nuxtjs/axios'
+    '@nuxtjs/axios',
+    // https://auth.nuxtjs.org/?standalone=true
+    '@nuxtjs/auth-next'
   ],
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
-  axios: {},
+  axios: {
+    proxy: false,
+    credentials: true,
+    baseURL: 'http://localhost:8000/api',
+    cookie: { name: 'XSRF-TOKEN' },
+    progress: false
+  },
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {
+  },
+
+  auth: {
+    strategies: {
+      laravelSanctum: {
+        provider: 'laravel/sanctum',
+        url: 'http://localhost:8000',
+        token: {
+          property: 'token',
+          required: true,
+          global: true,
+          name: 'Authorization',
+          type: 'Bearer'
+        },
+        user: {
+          property: 'data',
+          required: true
+        },
+        endpoints: {
+          login: { url: '/api/login', method: 'post' },
+          logout: { url: '/api/logout', method: 'post' },
+          user: { url: '/api/me', method: 'get' }
+        }
+      }
+    },
+    redirect: {
+      login: '/accounts/login',
+      logout: '/',
+      callback: '/accounts/login',
+      home: '/'
+    }
+  },
+
+  router: {
+    middleware: ['auth']
   }
 }
